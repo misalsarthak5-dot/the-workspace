@@ -112,7 +112,7 @@ The site should feel like visiting the developer's actual desk — alive, lit, t
 - All interactive 3D actions have non-3D equivalents reachable by keyboard and screen reader in Lite Mode.
 
 ### FR-8: Resume & Contact
-- Resume: downloadable PDF (URL from data file) + inline "Resume" section view.
+- Resume: downloadable PDF (URL from data file), opened in a new browser tab or downloaded directly. No inline PDF embedding — `react-pdf` is **not** in the stack.
 - Contact: form (name, email, message) posting to a serverless function or third-party form service (e.g., Formspree/Resend), plus direct links (email, LinkedIn, GitHub, X/Twitter) from data file.
 
 ### FR-9: Loading Experience
@@ -173,11 +173,11 @@ The site should feel like visiting the developer's actual desk — alive, lit, t
 ## 8. Component Breakdown
 
 ```
-<App>
+<ModeProvider>                          (ModeContext — isLite flag + toggle)
  ├── <LoadingScreen>
  ├── <LiteModeToggle>
- ├── <SceneCanvas>                      (R3F <Canvas>, mounted once)
- │    ├── <CameraRig>                   (handles all camera tweening)
+ ├── <SceneCanvas>                      (R3F <Canvas>, mounted once; hidden in Lite Mode)
+ │    ├── <CameraRig>                   (GSAP-driven camera tweening + interruption state machine)
  │    ├── <RoomModel>                   (GLTF room, static geometry)
  │    ├── <InteractiveObjects>
  │    │    ├── <Controller />
@@ -192,26 +192,24 @@ The site should feel like visiting the developer's actual desk — alive, lit, t
  │    ├── <Lighting />                  (key/fill/rim + RGB accent)
  │    └── <Postprocessing />            (bloom, vignette, DOF, particles)
  │
- ├── <UIOverlayRoot>                    (Framer Motion AnimatePresence)
- │    ├── <NavBar>
- │    ├── <HomePanel>
- │    ├── <AboutPanel>
- │    ├── <SkillsPanel>
- │    ├── <ProjectsPanel>
- │    │    └── <ProjectCard />  (repeatable, data-driven)
- │    ├── <ExperiencePanel>
- │    │    └── <TimelineItem /> (repeatable)
- │    ├── <EducationPanel>
- │    ├── <AchievementsPanel>
- │    ├── <CertificationsPanel>
- │    ├── <ResumePanel>
- │    └── <ContactPanel>
- │         └── <ContactForm />
- │
- └── <LiteModeRoot>                     (semantic HTML fallback, mirrors above 1:1)
+ └── <UIOverlayRoot>                    (Framer Motion AnimatePresence)
+      ├── <NavBar>
+      ├── <HomePanel>                   (dual-mode: 3D overlay OR semantic HTML via isLite)
+      ├── <AboutPanel>
+      ├── <SkillsPanel>
+      ├── <ProjectsPanel>
+      │    └── <ProjectCard />  (repeatable, data-driven)
+      ├── <ExperiencePanel>
+      │    └── <TimelineItem /> (repeatable)
+      ├── <EducationPanel>
+      ├── <AchievementsPanel>
+      ├── <CertificationsPanel>
+      ├── <ResumePanel>
+      └── <ContactPanel>
+           └── <ContactForm />
 ```
 
-Each `*Panel` is a "dumb" presentational component receiving props sourced exclusively from `src/data/*`.
+Each `*Panel` is a **dual-mode** presentational component: when `isLite` is `true` (from `ModeContext`), it renders semantic HTML with no glassmorphic wrapper or Framer Motion transitions; when `false`, it renders the full glassmorphic 3D-overlay experience. There is **no separate `LiteModeRoot.tsx`** — both modes share the same component tree.
 
 ---
 
@@ -283,7 +281,7 @@ interface CameraState {
 ```
 
 ### Behavior Rules
-- Implemented via `drei`'s `CameraControls` or a custom rig using `@react-spring/three` / GSAP tweening `camera.position` and a look-at target vector each frame.
+- Implemented via a **custom GSAP rig** that tweens `camera.position` and a look-at target vector each frame using `gsap.to()` with a custom easing curve. `CameraControls` (drei) and `@react-spring/three` are **not used** — GSAP is the sole camera animation runtime.
 - **Interruption handling:** if a new section is selected mid-transition, the rig captures current interpolated position/target as the new start point (no snapping back).
 - **Micro-motion:** while idle on a section, apply a very subtle parallax/breathing drift (±0.02 units) tied to mouse position (desktop) for a "premium" alive feel — disabled on mobile/lite.
 - **Depth of field:** subtle DOF blur shifts focus plane to the current focal object per section (e.g., monitor sharp on Projects, everything else softly blurred).
@@ -425,37 +423,44 @@ export const socialLinks: SocialLink[] = [ /* ... */ ];
 ## 14. Folder Structure
 
 ```
-portfolio/
+the-workspace/
 ├── public/
-│   ├── models/                 # optimized .glb files
-│   ├── textures/                # compressed textures (basis/ktx2 where possible)
+│   ├── models/                   # optimized .glb files (Draco/Meshopt compressed)
+│   ├── textures/                  # .ktx2 / Basis compressed textures
 │   └── resume/
 │       └── resume.pdf
 ├── src/
 │   ├── main.tsx
 │   ├── App.tsx
+│   │
+│   ├── context/                   # React contexts
+│   │   └── ModeContext.tsx        # isLite flag — replaces LiteModeRoot entirely
+│   │
 │   ├── routes/
 │   │   └── router.tsx
-│   ├── scene/
+│   │
+│   ├── scene/                     # Everything rendered inside <Canvas>
 │   │   ├── SceneCanvas.tsx
-│   │   ├── CameraRig.tsx
+│   │   ├── CameraRig.tsx          # GSAP tweening + interruption state machine
 │   │   ├── RoomModel.tsx
-│   │   ├── objects/
-│   │   │   ├── Controller.tsx
-│   │   │   ├── Keyboard.tsx
-│   │   │   ├── CoffeeMug.tsx
-│   │   │   ├── Monitor.tsx
-│   │   │   ├── DeskLamp.tsx
-│   │   │   └── ShelfDecor.tsx
+│   │   ├── Lighting.tsx
+│   │   ├── Postprocessing.tsx
+│   │   ├── WindowRain.tsx
 │   │   ├── HolographicTechDisplay.tsx
 │   │   ├── CertificateWall.tsx
-│   │   ├── WindowRain.tsx
-│   │   ├── Lighting.tsx
-│   │   └── Postprocessing.tsx
-│   ├── ui/
+│   │   └── objects/
+│   │       ├── Controller.tsx
+│   │       ├── Keyboard.tsx
+│   │       ├── CoffeeMug.tsx
+│   │       ├── Monitor.tsx
+│   │       ├── DeskLamp.tsx
+│   │       └── ShelfDecor.tsx
+│   │
+│   ├── ui/                        # Everything rendered outside <Canvas>
 │   │   ├── NavBar.tsx
-│   │   ├── Panel.tsx
-│   │   ├── panels/
+│   │   ├── Panel.tsx              # Base glassmorphic container (mode-aware via ModeContext)
+│   │   ├── UIOverlayRoot.tsx      # AnimatePresence host
+│   │   ├── panels/                # Dual-mode panels (3D overlay + Lite via ModeContext)
 │   │   │   ├── HomePanel.tsx
 │   │   │   ├── AboutPanel.tsx
 │   │   │   ├── SkillsPanel.tsx
@@ -477,11 +482,16 @@ portfolio/
 │   │       ├── LoadingScreen.tsx
 │   │       ├── LiteModeToggle.tsx
 │   │       └── Toast.tsx
-│   ├── lite/
-│   │   └── LiteModeRoot.tsx     # semantic HTML fallback mirroring all panels
+│   │
 │   ├── state/
-│   │   └── useAppStore.ts       # Zustand store
-│   ├── data/
+│   │   ├── useAppStore.ts         # Zustand root store (composes slices)
+│   │   ├── slices/                # Sliced store domains
+│   │   │   ├── cameraSlice.ts     # activeSection, cameraTransition, isTransitioning
+│   │   │   ├── uiSlice.ts         # isLiteMode, toastQueue, activePanel
+│   │   │   └── interactionSlice.ts # RGB state, steamActive, lampOn, monitorIndex
+│   │   └── selectors.ts           # Memoized selectors
+│   │
+│   ├── data/                      # All personal content — edit here, never in components
 │   │   ├── personal.ts
 │   │   ├── projects.ts
 │   │   ├── skills.ts
@@ -489,26 +499,39 @@ portfolio/
 │   │   ├── education.ts
 │   │   ├── achievements.ts
 │   │   └── certifications.ts
+│   │
 │   ├── types/
-│   │   └── content.ts
+│   │   ├── content.ts             # PersonalInfo, Project, Skill, Experience, etc.
+│   │   └── scene.ts               # SectionId, CameraState, DeviceTier, InteractionState
+│   │
+│   ├── config/
+│   │   └── cameraStates.ts        # Record<SectionId, CameraState> — typed registry
+│   │
 │   ├── hooks/
 │   │   ├── useDeviceTier.ts
 │   │   ├── useCameraTransition.ts
-│   │   └── useAssetLoader.ts
-│   ├── config/
-│   │   └── cameraStates.ts
+│   │   ├── useAssetLoader.ts
+│   │   └── useAdaptiveQuality.ts  # FPS monitor → quality tier stepping
+│   │
 │   ├── styles/
 │   │   └── globals.css
+│   │
 │   └── utils/
 │       ├── easing.ts
 │       └── analytics.ts
-├── api/                          # Vercel serverless functions
+│
+├── api/                           # Vercel serverless functions
 │   └── contact.ts
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml                 # Typecheck + lint + test + Lighthouse CI gate
+│
 ├── .eslintrc.cjs
 ├── .prettierrc
 ├── tailwind.config.ts
 ├── tsconfig.json
-├── vite.config.ts
+├── vite.config.ts                 # includes vite-ssg for prerendering
 └── package.json
 ```
 
@@ -527,7 +550,7 @@ portfolio/
 
 ## 16. Animation Guidelines
 
-- **Camera transitions:** custom cubic ease-in-out, 800–1600ms, GSAP or `@react-spring/three`.
+- **Camera transitions:** custom cubic ease-in-out, 800–1600ms, **GSAP** (standardized; `@react-spring/three` is not in the stack).
 - **UI panel transitions:** Framer Motion `AnimatePresence`, fade + 8–16px vertical slide, 250–350ms, staggered children (~40ms stagger) for lists (project cards, skill badges).
 - **Micro-interactions:** hover glow via emissive material lerp (150ms); click feedback via scale-down/up spring (stiffness ~300, damping ~20).
 - **Object animations:**
@@ -613,7 +636,7 @@ portfolio/
 
 ## 22. Accessibility
 
-- **Lite Mode** (see FR-7) provides a fully semantic, screen-reader-friendly HTML version of every section — same headings, same data, same nav order — reachable via a visible toggle and auto-triggered on WebGL-unsupported browsers or `prefers-reduced-motion: reduce` + low-end device heuristics.
+- **Lite Mode** (see FR-7) is rendered by the same panel components used in the 3D experience, controlled via `ModeContext` (`isLite` flag). When `isLite` is `true`, each panel renders semantic HTML with no glassmorphic wrapper or Framer Motion transitions — fully screen-reader-friendly, same headings, same data, same nav order. There is **no separate `LiteModeRoot.tsx`**. Lite Mode is reachable via a visible toggle and auto-triggered on WebGL-unsupported browsers or `prefers-reduced-motion: reduce` + low-end device heuristics.
 - All interactive nav elements are real `<button>`/`<a>` elements with visible focus states (not divs with onClick only).
 - Color contrast in UI panels meets WCAG AA against the dark background (verify text-secondary against bg-panel).
 - Keyboard navigation: `Tab` cycles through nav items and in-panel interactive elements in logical order; `Enter`/`Space` activates.
@@ -625,7 +648,7 @@ portfolio/
 
 ## 23. SEO Strategy
 
-- Because the primary experience is a client-rendered 3D canvas (poor for crawlers), the app **prerenders the Lite Mode HTML** for each route (`/`, `/about`, `/projects`, etc.) at build time (via Vite SSG plugin or a prerendering step) so crawlers and social scrapers receive full semantic content.
+- Because the primary experience is a client-rendered 3D canvas (poor for crawlers), the app **prerenders the Lite Mode HTML** for each route (`/`, `/about`, `/projects`, etc.) at build time via **`vite-ssg`** so crawlers and social scrapers receive full semantic content. `vite-ssg` integrates with React Router and renders each route's panel tree with `isLite = true` during the build step.
 - Each route has unique `<title>`, meta description, and Open Graph/Twitter Card tags generated from the data files (e.g., Projects OG image auto-generated or set per featured project).
 - `sitemap.xml` and `robots.txt` generated from the same route list.
 - Structured data (`schema.org/Person`, `schema.org/CreativeWork` for projects) embedded in prerendered HTML.
@@ -674,47 +697,73 @@ portfolio/
 
 ## 27. Development Roadmap
 
-**Phase 0 — Foundation (Week 1)**
-- Repo scaffold: Vite + React + TS + Tailwind + ESLint/Prettier.
-- Data layer + TypeScript interfaces (Section 13) fully defined with placeholder content.
-- Lite Mode fully built first (semantic HTML, all 10 sections, routing, contact form) — this is the accessible/SEO baseline and safety net.
+Development is organized by **milestones** (feature-complete states), not calendar weeks. Each milestone has a clear exit criterion and the project is shippable from Milestone 1 onward.
 
-**Phase 1 — Core 3D Scene (Weeks 2–3)**
-- Room + desk model integration (placeholder/blockout assets acceptable initially).
-- Basic camera rig with hardcoded camera states for all 10 sections.
-- Zustand store wiring nav ↔ camera ↔ UI panels.
+**Milestone 0 — Scaffold**
+- Repo scaffold: Vite + React + TS + Tailwind + ESLint/Prettier + R3F + Drei.
+- `.github/workflows/ci.yml` configured (typecheck, lint, test, Lighthouse CI gate).
+- Empty canvas renders; CI pipeline is green.
+- _Exit Criteria:_ Project boots locally with no type errors; CI passes on first commit.
 
-**Phase 2 — Interactivity & Polish (Weeks 4–5)**
-- Interactive objects (controller, keyboard RGB, coffee steam, monitor cycling, lamp toggle).
-- Postprocessing (bloom, DOF, vignette), lighting pass, optional rain ambience.
-- Framer Motion panel transitions synced with camera transitions.
+**Milestone 1 — Lite Mode MVP**
+- `src/types/content.ts` and `src/types/scene.ts` fully defined.
+- All data files scaffolded (`src/data/*`) with placeholder content.
+- `ModeContext` created; all 10 panels built in dual-mode architecture.
+- React Router routing wired; `vite-ssg` prerendering configured and verified.
+- Contact form functional (Formspree or Resend endpoint).
+- _Exit Criteria:_ All 10 sections navigable, accessible (Lighthouse A11y ≥ 90), and prerendered HTML valid for SEO crawlers. Portfolio is **deployable at this milestone**.
 
-**Phase 3 — Responsive & Performance (Week 6)**
-- Device-tier detection + LOD asset pipeline.
-- Mobile fallback experience tuning.
-- Performance profiling and optimization pass (target metrics from Section 6).
+**Milestone 2 — 3D Scene Alpha**
+- Room + desk model integration (placeholder/blockout `.glb` assets acceptable).
+- GSAP-based `CameraRig` with all 10 `CameraState` entries defined in `config/cameraStates.ts`.
+- Camera interruption state machine implemented.
+- Zustand store slices wired: nav click → store → GSAP tween → panel render.
+- _Exit Criteria:_ Camera navigates smoothly between all 10 sections; panels swap correctly; no visual polish required.
 
-**Phase 4 — Content, SEO, QA (Week 7)**
-- Final real content population (projects, experience, resume, etc.) via data files only.
-- Prerendering setup for SEO (Section 23).
-- Accessibility audit (Section 22) and cross-browser QA.
+**Milestone 3 — Interactive Beta**
+- All 5 interactive room objects functional (controller, keyboard RGB, coffee steam, monitor cycling, lamp toggle).
+- Postprocessing pass: bloom, DOF, vignette.
+- Lighting pass: key/fill/rim + RGB accent.
+- Framer Motion panel transitions synced to GSAP camera transitions.
+- Optional: window rain ambience.
+- `useAdaptiveQuality` hook implemented.
+- _Exit Criteria:_ Full interactive experience functional end-to-end on desktop; all object interactions work; transitions feel premium.
 
-**Phase 5 — Launch (Week 8)**
-- Deployment to Vercel, domain setup, analytics wiring.
-- Post-launch monitoring (Core Web Vitals, error tracking via Sentry or similar).
+**Milestone 4 — Performance-Hardened RC**
+- Device-tier detection active (`useDeviceTier`).
+- LOD asset pipeline in place (desktop vs. mobile `.glb` variants).
+- Adaptive quality stepping working (FPS monitor → quality tier reduction).
+- Mobile 3D scene or automatic Lite Mode fallback verified.
+- _Exit Criteria:_ ≥ 50 FPS on desktop, ≥ 30 FPS on mid-tier mobile; initial JS payload < 300KB gzipped.
+
+**Milestone 5 — Content-Complete & SEO-Ready**
+- All real content populated via data files only (no component changes).
+- `vite-ssg` prerendering verified: all 10 routes produce valid semantic HTML.
+- Lighthouse SEO ≥ 95; Lighthouse A11y ≥ 90.
+- Accessibility audit (axe-core + manual screen reader pass) complete.
+- Cross-browser QA: Chrome, Firefox, Safari, Edge; iOS Safari; Android Chrome.
+- _Exit Criteria:_ Content complete; SEO and a11y scores meet targets; all browsers pass.
+
+**Milestone 6 — Public Launch**
+- Deployed to production domain on Vercel.
+- Analytics wired (Vercel Analytics or Umami).
+- Error tracking (Sentry or equivalent) active.
+- Post-deploy smoke test script passes (all 10 routes + contact form).
+- _Exit Criteria:_ Site live on custom domain; monitoring active; Core Web Vitals green.
 
 ---
 
 ## 28. Milestones
 
-| Milestone | Target | Exit Criteria |
-|---|---|---|
-| M1 — Lite Mode MVP | End Week 1 | All 10 sections navigable, fully accessible, real routing, content wired to data layer |
-| M2 — 3D Scene Alpha | End Week 3 | Camera navigates between all 10 states with placeholder models; no interactivity yet |
-| M3 — Interactive Beta | End Week 5 | All interactive objects functional; postprocessing/lighting pass complete |
-| M4 — Performance-Hardened RC | End Week 6 | Meets all Section 6 performance targets across desktop/tablet/mobile |
-| M5 — Content-Complete & SEO-Ready | End Week 7 | Real content live; prerendered pages pass Lighthouse SEO ≥ 95 |
-| M6 — Public Launch | End Week 8 | Deployed to production domain, monitoring active |
+| Milestone | Exit Criteria |
+|---|---|
+| M0 — Scaffold | Project boots with no type errors; CI pipeline green on first commit |
+| M1 — Lite Mode MVP | All 10 sections navigable, accessible (A11y ≥ 90), prerendered; contact form live; **deployable** |
+| M2 — 3D Scene Alpha | Camera navigates all 10 states via GSAP; Zustand slices wired; no polish required |
+| M3 — Interactive Beta | All 5 interactive objects functional; postprocessing + lighting complete; transitions premium |
+| M4 — Performance RC | ≥ 50 FPS desktop / ≥ 30 FPS mobile; JS payload < 300KB gzipped; adaptive quality active |
+| M5 — Content + SEO | Real content live; Lighthouse SEO ≥ 95; a11y audit passed; cross-browser QA complete |
+| M6 — Launch | Live on custom domain; monitoring active; Core Web Vitals green |
 
 ---
 
@@ -747,13 +796,14 @@ portfolio/
 | Tech | Justification |
 |---|---|
 | **React 18 + Vite** | Fast dev server/HMR, excellent ecosystem fit for React Three Fiber; Vite's build speed suits a 3D-asset-heavy project with frequent iteration |
-| **TypeScript** | Enforces the strict data-model contract in Section 13 — critical for a "data-driven, no hardcoded content" requirement |
+| **TypeScript** | Enforces the strict data-model contract in Sections 13 & 14 — critical for a "data-driven, no hardcoded content" requirement; strict mode enabled |
 | **Tailwind CSS** | Rapid, consistent utility-based styling for the glassmorphic design system; easy to keep spacing/color tokens consistent |
-| **React Three Fiber** | Declarative Three.js in React idioms; integrates naturally with component-based architecture and React state (Zustand) |
-| **Drei** | Provides battle-tested helpers (`useGLTF`, `useTexture`, `CameraControls`, `Environment`, `useProgress`) that would otherwise require significant custom Three.js code |
-| **Framer Motion** | Best-in-class declarative UI animation for the overlay panels; pairs cleanly with React's component lifecycle |
-| **GSAP** | Included specifically for camera tweening and complex sequenced animations (e.g., multi-property easing) where finer timeline control outperforms spring-based libraries |
-| **React Router** | Needed to give each section a real, shareable, bookmarkable URL and to support the prerendering/SEO strategy in Section 23 |
+| **React Three Fiber** | Declarative Three.js in React idioms; integrates naturally with component-based architecture and Zustand state |
+| **Drei** | Provides battle-tested helpers (`useGLTF`, `useTexture`, `Environment`, `useProgress`) that would otherwise require significant custom Three.js code; `CameraControls` from Drei is **not used** — GSAP handles all camera animation |
+| **Framer Motion** | **Sole UI animation runtime.** All overlay panel transitions, nav active states, and UI micro-interactions. `AnimatePresence` handles panel mount/unmount with staggered children. `@react-spring/three` is **not in the stack**. |
+| **GSAP** | **Sole camera animation runtime.** Used exclusively for `CameraRig` tweening — imperative timeline control, clean interruption handling, and custom easing that spring-based libraries cannot match for camera work. |
+| **vite-ssg** | Static site generation plugin for Vite — prerenders Lite Mode HTML for all 10 routes at build time, giving crawlers and social scrapers full semantic content without a separate SSR server |
+| **React Router** | Gives each section a real, shareable, bookmarkable URL; integrates with `vite-ssg` for per-route prerendering |
 | **Leva** | Developer-only debug panel for real-time tuning of camera states, lighting, and material parameters during development (stripped from production build) |
 | **Lucide React / React Icons** | Consistent, tree-shakeable icon set matching the minimal design system |
 | **Vercel** | Zero-config static + serverless deployment, instant rollbacks, preview deployments per PR, generous free tier suitable for a portfolio |

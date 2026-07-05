@@ -24,14 +24,15 @@ The project is inspired by the feeling of navigating a premium game menu while m
 
 ## 🛠 Tech Stack
 
-- React
-- TypeScript
-- Vite
+- React 18
+- TypeScript (strict mode)
+- Vite + vite-ssg
 - Tailwind CSS
-- React Three Fiber
-- Drei
-- Framer Motion
-- Zustand
+- React Three Fiber + Drei
+- GSAP (camera animations)
+- Framer Motion (UI animations)
+- Zustand (sliced store)
+- React Router
 
 ---
 
@@ -45,4 +46,4 @@ docs/PRD.md
 
 ## 📍 Status
 
-🚧 Currently in development.
+🚧 Currently in development. Architecture finalized — awaiting Milestone 0 implementation approval.
