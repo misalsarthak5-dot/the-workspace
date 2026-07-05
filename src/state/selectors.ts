@@ -17,6 +17,7 @@ export const useIsTransitioning = () => useAppStore((s) => s.transitionStatus ==
 export const useIsLiteMode = () => useAppStore((s) => s.isLiteMode);
 export const useDeviceTier = () => useAppStore((s) => s.deviceTier);
 export const useToastQueue = () => useAppStore((s) => s.toastQueue);
+export const useQualityTier = () => useAppStore((s) => s.qualityTier);
 
 // ── Interaction Selectors ─────────────────────────────────────
 export const useKeyboardHue = () => useAppStore((s) => s.keyboardHue);

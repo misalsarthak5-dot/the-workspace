@@ -12,10 +12,12 @@ export interface UiSlice {
   isLiteMode: boolean;
   deviceTier: DeviceTier;
   toastQueue: Toast[];
+  qualityTier: 'high' | 'medium' | 'low';
   // Actions
   setLiteMode: (lite: boolean) => void;
   toggleLiteMode: () => void;
   setDeviceTier: (tier: DeviceTier) => void;
+  setQualityTier: (tier: 'high' | 'medium' | 'low') => void;
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
 }
@@ -26,12 +28,15 @@ export const createUiSlice: StateCreator<AppStore, [], [], UiSlice> = (set) => (
   isLiteMode: false,
   deviceTier: 'desktop',
   toastQueue: [],
+  qualityTier: 'high',
 
   setLiteMode: (lite) => set({ isLiteMode: lite }),
 
   toggleLiteMode: () => set((state) => ({ isLiteMode: !state.isLiteMode })),
 
   setDeviceTier: (tier) => set({ deviceTier: tier }),
+
+  setQualityTier: (tier) => set({ qualityTier: tier }),
 
   addToast: (toast) =>
     set((state) => ({
