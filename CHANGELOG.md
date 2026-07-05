@@ -1,6 +1,29 @@
 # Changelog
+## v0.3.0 - Design Foundation
 
-## v0.2.0
+### Added
+
+- Global design system
+- Tailwind design tokens
+- Reusable UI primitives:
+  - Button
+  - Card
+  - Section
+  - Container
+  - Heading
+- Base Layout component
+- Design showcase page
+- Glassmorphism utility styles
+
+### Improved
+
+- Type-safe Vite configuration
+- Global accessibility styles
+- Responsive spacing and typography
+- Verified `npm run typecheck`
+- Verified `npm run build`
+
+## v0.2.0 - Architecture Finalization
 
 - Updated PRD (Section 7, 8, 11, 14, 16, 22, 23, 27, 28, Appendix A) to reflect approved architectural decisions
 - **Animation runtimes finalized:** GSAP is the sole camera animation runtime; Framer Motion is the sole UI animation runtime; `@react-spring/three` is removed from the stack
@@ -16,7 +39,7 @@
 - Updated `README.md` tech stack to reflect finalized stack
 - Replaced `TODO.md` with a granular milestone-based task tracker (M0–M6)
 
-## v0.1.0
+## v0.1.0 -Project Initialization
 
 - Created GitHub repository
 - Added README
