@@ -19,7 +19,6 @@ export type AnalyticsEvent =
  */
 export function track(event: AnalyticsEvent): void {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.warn('[Analytics]', event.name, event.properties);
   }
   // TODO M6: wire to Vercel Analytics or Umami

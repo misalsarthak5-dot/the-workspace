@@ -46,7 +46,7 @@ export interface ExperienceEntry {
   role: string;
   organization: string;
   startDate: string; // ISO date string
-  endDate: string | 'present';
+  endDate: string;
   description: string;
   highlights?: string[];
 }
