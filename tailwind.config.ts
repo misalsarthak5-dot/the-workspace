@@ -47,6 +47,12 @@ export default {
       backgroundImage: {
         'accent-gradient': 'linear-gradient(135deg, #4F8CFF, #9B5CFF)',
       },
+      boxShadow: {
+        'glass-sm': '0 2px 8px -2px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05)',
+        'glass-md': '0 4px 16px -4px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08)',
+        'glass-lg': '0 8px 32px -8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+        'accent-glow': '0 0 15px rgba(79, 140, 255, 0.15), 0 0 30px rgba(155, 92, 255, 0.1)',
+      },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
         'slide-up': 'slideUp 0.3s ease-out forwards',
