@@ -1,6 +1,7 @@
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import App from '@/App';
-import { SECTION_IDS, type SectionId } from '@/types/scene';
+import { SECTION_IDS } from '@/config/sections';
+import type { SectionId } from '@/types/scene';
 
 // ─────────────────────────────────────────────────────────────
 // Router

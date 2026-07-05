@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { ModeProvider } from '@/context/ModeContext';
 import { useAppStore } from '@/state/useAppStore';
 import type { SectionId } from '@/types/scene';
+import { useURLSync } from '@/hooks/useURLSync';
+import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import '@/styles/globals.css';
 
 import Layout from '@/ui/Layout';
@@ -13,12 +15,16 @@ interface AppProps {
 }
 
 export default function App({ initialSection = 'home' }: AppProps) {
-  const setActiveSection = useAppStore((s) => s.setActiveSection);
+  const navigateToSection = useAppStore((s) => s.navigateToSection);
+
+  // Call synchronization and demo navigation hooks
+  useURLSync();
+  useKeyboardNavigation();
 
   // Sync the initial section from the URL route into the store.
   useEffect(() => {
-    setActiveSection(initialSection);
-  }, [initialSection, setActiveSection]);
+    navigateToSection(initialSection);
+  }, [initialSection, navigateToSection]);
 
   return (
     <ModeProvider>

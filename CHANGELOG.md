@@ -1,4 +1,49 @@
 # Changelog
+## v0.5.0 - Camera Navigation & Section System
+
+### Added
+
+- Centralized portfolio section registry (`sections.ts`)
+- URL synchronization between React Router and Zustand
+- Keyboard navigation (Left/Right Arrow) for section transitions
+- GSAP-powered `CameraController` for smooth camera navigation
+- Camera transition state management
+- Browser history and deep-link support
+
+### Improved
+
+- Refactored camera navigation architecture
+- Separated UI navigation state from camera state
+- Simplified `CameraRig` to camera registration only
+- Added camera transition interruption handling
+- Updated camera states for all portfolio sections
+- Verified `npm run typecheck`
+- Verified `npm run lint`
+- Verified `npm run build`
+## v0.4.0 - 3D Scene Foundation
+
+### Added
+
+- React Three Fiber scene foundation
+- Perspective camera setup
+- Dynamic lighting and shadow system
+- Ground plane for the workspace
+- Adaptive quality controller
+- Camera registration in Zustand
+- SceneRoot component
+- Environment component
+- Lighting component
+- Ground component
+
+### Improved
+
+- Connected adaptive quality system to the 3D renderer
+- Optimized Canvas renderer settings (DPR, shadows, antialiasing)
+- Simplified application shell for 3D rendering
+- Enhanced camera state management
+- Verified `npm run typecheck`
+- Verified `npm run lint`
+- Verified `npm run build`
 ## v0.3.0 - Design Foundation
 
 ### Added

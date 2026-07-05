@@ -22,35 +22,16 @@ export type SectionId =
   | 'achievements'
   | 'certifications'
   | 'resume'
-  | 'contact';
+  | 'contact'
+  | 'extras';
 
-/** All valid section IDs as a runtime array (for nav rendering). */
-export const SECTION_IDS: SectionId[] = [
-  'home',
-  'about',
-  'skills',
-  'projects',
-  'experience',
-  'education',
-  'achievements',
-  'certifications',
-  'resume',
-  'contact',
-];
-
-/** Display labels for each section (for nav rendering). */
-export const SECTION_LABELS: Record<SectionId, string> = {
-  home: 'Home',
-  about: 'About',
-  skills: 'Skills',
-  projects: 'Projects',
-  experience: 'Experience',
-  education: 'Education',
-  achievements: 'Achievements',
-  certifications: 'Certifications',
-  resume: 'Resume',
-  contact: 'Contact',
-};
+export interface PortfolioSection {
+  id: SectionId;
+  displayName: string;
+  cameraStateId: SectionId;
+  urlSlug: string;
+  navigationOrder: number;
+}
 
 // ── Camera ───────────────────────────────────────────────────
 

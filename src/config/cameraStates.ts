@@ -103,4 +103,12 @@ export const CAMERA_STATES: Record<SectionId, CameraState> = {
     transitionDurationMs: 1200,
     easing: 'power2.inOut',
   },
+  extras: {
+    id: 'extras',
+    position: [-2.5, 1.8, 3.2],
+    target: [-2.0, 1.2, 0],
+    fov: 55,
+    transitionDurationMs: 1400,
+    easing: 'power2.inOut',
+  },
 };

@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { AdaptiveEvents, AdaptiveDpr } from '@react-three/drei';
 import CameraRig from './CameraRig';
+import CameraController from './CameraController';
 import Lighting from './Lighting';
 import Environment from './Environment';
 import Ground from './Ground';
@@ -42,6 +43,7 @@ export default function SceneRoot() {
       <AdaptiveDpr pixelated />
       <AdaptiveQualityController />
       <CameraRig />
+      <CameraController />
       <Lighting />
       <Environment />
       <Ground />

@@ -11,7 +11,7 @@ import type { SectionId } from '@/types/scene';
 // ── Camera Selectors ──────────────────────────────────────────
 export const useActiveSection = () => useAppStore((s) => s.activeSection);
 export const useTransitionStatus = () => useAppStore((s) => s.transitionStatus);
-export const useIsTransitioning = () => useAppStore((s) => s.transitionStatus === 'transitioning');
+export const useIsTransitioning = () => useAppStore((s) => s.isTransitioning);
 
 // ── UI Selectors ──────────────────────────────────────────────
 export const useIsLiteMode = () => useAppStore((s) => s.isLiteMode);
@@ -27,7 +27,7 @@ export const useLampOn = () => useAppStore((s) => s.lampOn);
 export const useControllerAnimating = () => useAppStore((s) => s.controllerAnimating);
 
 // ── Action Selectors ──────────────────────────────────────────
-export const useSetActiveSection = () => useAppStore((s) => s.setActiveSection);
+export const useNavigateToSection = () => useAppStore((s) => s.navigateToSection);
 export const useToggleLiteMode = () => useAppStore((s) => s.toggleLiteMode);
 
 /** Returns true if the given section is currently active. */
