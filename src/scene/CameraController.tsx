@@ -1,12 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { useAppStore } from '@/state/useAppStore';
 import { CAMERA_STATES } from '@/config/cameraStates';
 
 export default function CameraController() {
-  const { camera } = useThree();
+  const camera = useAppStore((s) => s.camera);
   const activeSection = useAppStore((s) => s.activeSection);
   const setTransitionStatus = useAppStore((s) => s.setTransitionStatus);
   const setTransitioning = useAppStore((s) => s.setTransitioning);
@@ -18,7 +17,7 @@ export default function CameraController() {
 
   useEffect(() => {
     if (!camera) return;
-    const perspectiveCamera = camera as THREE.PerspectiveCamera;
+    const perspectiveCamera = camera;
 
     const state = CAMERA_STATES[activeSection];
     if (!state) return;
@@ -48,6 +47,10 @@ export default function CameraController() {
       const ease = state.easing;
 
       const tl = gsap.timeline({
+        onUpdate: () => {
+          // lookAt must be called every frame while position or target is animating
+          perspectiveCamera.lookAt(currentTargetRef.current);
+        },
         onComplete: () => {
           setTransitionStatus('idle');
           setTransitioning(false);
@@ -64,23 +67,13 @@ export default function CameraController() {
         ease,
       }, 0);
 
-      // Animate target vector
-      const targetObj = {
-        x: currentTargetRef.current.x,
-        y: currentTargetRef.current.y,
-        z: currentTargetRef.current.z,
-      };
-
-      tl.to(targetObj, {
+      // Animate target vector directly
+      tl.to(currentTargetRef.current, {
         x: state.target[0],
         y: state.target[1],
         z: state.target[2],
         duration,
         ease,
-        onUpdate: () => {
-          currentTargetRef.current.set(targetObj.x, targetObj.y, targetObj.z);
-          perspectiveCamera.lookAt(currentTargetRef.current);
-        },
       }, 0);
 
       // Animate FOV

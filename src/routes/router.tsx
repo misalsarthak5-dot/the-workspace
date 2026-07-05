@@ -1,7 +1,5 @@
-import { createBrowserRouter, type RouteObject } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import App from '@/App';
-import { SECTION_IDS } from '@/config/sections';
-import type { SectionId } from '@/types/scene';
 
 // ─────────────────────────────────────────────────────────────
 // Router
@@ -13,9 +11,9 @@ import type { SectionId } from '@/types/scene';
 // The router is used for URL history sync and deep-linking only.
 // ─────────────────────────────────────────────────────────────
 
-const sectionRoutes: RouteObject[] = SECTION_IDS.map((id: SectionId) => ({
-  path: id === 'home' ? '/' : `/${id}`,
-  element: <App initialSection={id} />,
-}));
-
-export const router = createBrowserRouter(sectionRoutes);
+export const router = createBrowserRouter([
+  {
+    path: '/:sectionId?',
+    element: <App />,
+  },
+]);

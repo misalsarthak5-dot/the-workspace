@@ -58,24 +58,6 @@ export const CAMERA_STATES: Record<SectionId, CameraState> = {
     transitionDurationMs: 1600,
     easing: 'power2.inOut',
   },
-  education: {
-    id: 'education',
-    // Certificate wall, lower section
-    position: [2.5, 1.2, 1.5],
-    target: [2.0, 1.0, -1.0],
-    fov: 55,
-    transitionDurationMs: 1400,
-    easing: 'power2.inOut',
-  },
-  achievements: {
-    id: 'achievements',
-    // Rotate to shelf area (upper left)
-    position: [-2.2, 2.2, 1.8],
-    target: [-1.8, 1.8, -0.5],
-    fov: 58,
-    transitionDurationMs: 1600,
-    easing: 'power2.inOut',
-  },
   certifications: {
     id: 'certifications',
     // Certificate wall, focused zoom
@@ -108,6 +90,15 @@ export const CAMERA_STATES: Record<SectionId, CameraState> = {
     position: [-2.5, 1.8, 3.2],
     target: [-2.0, 1.2, 0],
     fov: 55,
+    transitionDurationMs: 1400,
+    easing: 'power2.inOut',
+  },
+  settings: {
+    id: 'settings',
+    // Close-up view of the PC tower chassis
+    position: [1.2, 1.1, 0.3],
+    target: [0.9, 0.8, -0.4],
+    fov: 45,
     transitionDurationMs: 1400,
     easing: 'power2.inOut',
   },

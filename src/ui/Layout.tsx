@@ -11,7 +11,7 @@ export default function Layout({ className = '', children }: LayoutProps) {
   return (
     <div
       className={`
-        min-h-screen
+        h-screen
         w-full
         bg-bg-base
         text-text-primary
@@ -30,7 +30,7 @@ export default function Layout({ className = '', children }: LayoutProps) {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
       {/* Main Content Area */}
-      <main className="flex-grow flex flex-col relative z-10">
+      <main className="h-full w-full flex-grow flex flex-col relative z-10">
         {children}
       </main>
     </div>

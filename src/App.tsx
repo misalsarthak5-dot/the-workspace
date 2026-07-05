@@ -9,12 +9,11 @@ import '@/styles/globals.css';
 import Layout from '@/ui/Layout';
 import SceneRoot from '@/scene/SceneRoot';
 
-interface AppProps {
-  /** The section this route corresponds to — used for deep-linking. */
-  initialSection?: SectionId;
-}
+import { useParams } from 'react-router-dom';
 
-export default function App({ initialSection = 'home' }: AppProps) {
+export default function App() {
+  const { sectionId } = useParams();
+  const initialSection = (sectionId || 'home') as SectionId;
   const navigateToSection = useAppStore((s) => s.navigateToSection);
 
   // Call synchronization and demo navigation hooks

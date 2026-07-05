@@ -15,15 +15,14 @@
 export type SectionId =
   | 'home'
   | 'about'
-  | 'skills'
-  | 'projects'
   | 'experience'
-  | 'education'
-  | 'achievements'
+  | 'projects'
+  | 'skills'
   | 'certifications'
   | 'resume'
   | 'contact'
-  | 'extras';
+  | 'extras'
+  | 'settings';
 
 export interface PortfolioSection {
   id: SectionId;

@@ -13,10 +13,13 @@ export function useURLSync() {
   useEffect(() => {
     const path = location.pathname.substring(1); // remove leading slash
     const section = PORTFOLIO_SECTIONS.find((s) => s.urlSlug === path);
-    if (section && section.id !== activeSection) {
-      navigateToSection(section.id);
+    if (section) {
+      const currentActive = useAppStore.getState().activeSection;
+      if (section.id !== currentActive) {
+        navigateToSection(section.id);
+      }
     }
-  }, [location.pathname, navigateToSection, activeSection]);
+  }, [location.pathname, navigateToSection]);
 
   // 2. Sync from Store to URL (handles store-driven navigation)
   useEffect(() => {

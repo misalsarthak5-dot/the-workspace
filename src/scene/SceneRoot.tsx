@@ -4,7 +4,8 @@ import CameraRig from './CameraRig';
 import CameraController from './CameraController';
 import Lighting from './Lighting';
 import Environment from './Environment';
-import Ground from './Ground';
+import Room from './Room';
+import Workspace from './Workspace';
 import { useAppStore } from '@/state/useAppStore';
 import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
 
@@ -46,7 +47,8 @@ export default function SceneRoot() {
       <CameraController />
       <Lighting />
       <Environment />
-      <Ground />
+      <Room />
+      <Workspace />
     </Canvas>
   );
 }
