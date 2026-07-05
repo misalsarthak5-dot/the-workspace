@@ -98,7 +98,7 @@ export default function Button({
         target={target}
         rel={target === '_blank' && !rel ? 'noopener noreferrer' : rel}
         className={sharedClasses}
-        aria-disabled={isDisabled ? 'true' : undefined}
+        aria-disabled={isDisabled ? true : undefined}
         role="button"
         tabIndex={isDisabled ? -1 : 0}
         {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}
